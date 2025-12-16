@@ -1,0 +1,564 @@
+DemoApplication.java:
+
+package com.example.demo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+
+@SpringBootApplication
+public class DemoApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(DemoApplication.class, args);
+	}
+
+}
+
+
+Chair.java:
+
+package com.example.demo.bean;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+@Entity
+public class Chair {
+
+    @Id
+    @Column(name = "c_id")
+    private int cId;
+    @Column(name = "c_name")
+    private String cName;
+    @Column(name = "c_legs")
+    private int cLegs;
+    public Chair() {  // <-- required by JPA/Hibernate
+    }
+    public Chair(int cId, String cName, int cLegs) {
+        this.cId = cId;
+        this.cName = cName;
+        this.cLegs = cLegs;
+    }
+
+    public int getcId() {
+        return cId;
+    }
+
+    public String getcName() {
+        return cName;
+    }
+
+    public int getcLegs() {
+        return cLegs;
+    }
+
+    @Override
+    public String toString() {
+        return "Chair{" +
+                "cId=" + cId +
+                ", cName='" + cName + '\'' +
+                ", cLegs='" + cLegs + '\'' +
+                '}';
+    }
+}
+
+
+
+LoginController.java:
+
+
+package com.example.demo.controller;
+
+import com.example.demo.bean.Chair;
+import com.example.demo.service.LoginService;
+import com.example.demo.service.RegisterService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
+
+@Controller("loginController")
+public class LoginController {
+
+    @Autowired
+    private LoginService ls;
+    @Autowired
+    RegisterService rservice;
+
+    @GetMapping("/home")
+    public String showLoginPage() {
+        return "LoginPage";
+    }
+
+    @PostMapping("/login")
+    public String processLogin(@RequestParam("username") String username,
+                               @RequestParam("password") String password,
+                               Model model) {
+
+        boolean ok = ls.loginCheck(username, password);
+
+        if (ok) {
+            model.addAttribute("user", username);
+            return "success";
+        } else {
+            model.addAttribute("error", "Invalid username or password");
+            return "failure";
+        }
+    }
+
+    @PostMapping("/login-chair")
+    public ModelAndView loginChair(@RequestParam int cId, @RequestParam String cName) {
+        // Validate chair from DB
+
+
+        Chair chair = rservice.validateChair(cId, cName);
+
+        if (chair != null) {
+            ModelAndView mv = new ModelAndView("success-chair");
+            mv.addObject("cId", chair.getcId());
+            mv.addObject("cName", chair.getcName());
+            mv.addObject("cLegs", chair.getcLegs()); // fetched from DB
+            return mv;
+        } else {
+            return new ModelAndView("failure");
+        }
+
+    }
+
+}
+ 
+
+RegisterController.java:
+
+package com.example.demo.controller;
+
+import com.example.demo.bean.Chair;
+import com.example.demo.service.RegisterService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+@Controller
+public class RegisterController {
+    @Autowired
+    RegisterService rservice;
+
+    @GetMapping("/login-chair-form")
+    public String showLoginChairForm() {
+        return "LoginChair"; // resolves to /pages/loginchair.jsp
+    }
+
+    @GetMapping("/register-form")
+    public String showForm() {
+        return "register"; // /pages/register.jsp
+    }
+
+    @PostMapping("/register-chair")
+    public ModelAndView reg(HttpServletRequest request){
+        int id=Integer.parseInt(request.getParameter("cId"));
+        String name=request.getParameter("cName");
+        int legs=Integer.parseInt(request.getParameter("cLegs"));
+         Chair e=new Chair(id,name,legs);
+        boolean b=rservice.insertDB(e);
+        if(b) {
+            return new ModelAndView("success");
+        }
+        else
+            return new ModelAndView("failure");
+    }
+}
+
+
+LoginDao.java:
+
+
+package com.example.demo.dao;
+
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class LoginDAO {
+
+    /**
+     * Simple hardcoded check; update with DB/auth as needed.
+     */
+    public boolean loginCheck(String user, String pass) {
+        return "admin".equals(user) && "admin".equals(pass);
+    }
+}
+ 
+
+RegisterDao.java:
+
+package com.example.demo.dao;
+
+import com.example.demo.bean.Chair;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface RegisterDAO extends CrudRepository<Chair,Integer>{
+
+  boolean existsByCIdAndCName(int cId, String cName);
+
+    // Optional: find by composite fields if you need the entity back
+    Chair findByCIdAndCName(int cId, String cName);
+
+}
+
+
+LoginService.java:
+
+package com.example.demo.service;
+
+import com.example.demo.dao.LoginDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class LoginService {
+
+    @Autowired
+    private LoginDAO dao;
+
+    /**
+     * Delegates to DAO; consistent logic: both username and password must match.
+     */
+    public boolean loginCheck(String user, String pass) {
+        return dao.loginCheck(user, pass);
+    }
+}
+
+RegisterService.java:
+
+package com.example.demo.service;
+
+import com.example.demo.bean.Chair;
+import com.example.demo.dao.RegisterDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class RegisterService {
+    @Autowired
+    RegisterDAO rdao;
+    public boolean insertDB(Chair e){
+        rdao.save(e);
+        return  true;
+    }
+
+    public Chair validateChair(int cId, String cName) {
+        return rdao.findByCIdAndCName(cId, cName);
+    }
+
+    public boolean validateChairExists(int cId, String cName) {
+        return rdao.existsByCIdAndCName(cId, cName); // boolean
+    }
+
+    public Chair getChair(int cId, String cName) {
+        return rdao.findByCIdAndCName(cId, cName); // entity
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+failure.jsp:
+
+
+<%@ page contentType="text/html; charset=UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Success</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+         ent-center align-items-center vh-100">
+
+    <div class="card shadow-lg text-center" style="width: 28rem;">
+        <div class="card-header bg-danger text-white">
+            <h2 class="mb-0">Login Failed</h2>
+        </div>
+        <div class="card-body">
+
+           <a href="${pageContext.request.contextPath}/home"> Go to Home</a>
+           <a th:href="@{/home}" class="d">
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+
+LoginChair.jsp:
+
+
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chair Login</title>
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+         rel="stylesheet"
+         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+         crossorigin="anonymous">
+    <style>
+        .center-card {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container center-card">
+    <div class="card shadow-lg rounded-4 border-0" style="width: 28rem; background-color: #fff;">
+
+        <div class="card-header bg-primary text-white text-center">
+            <h3 class="mb-0">Chair Login</h3>
+        </div>
+
+        <div class="card-body p-4">
+        <form method="post" action="${pageContext.request.contextPath}/login-chair">
+
+
+                <div class="mb-3">
+                    <label for="cId" class="form-label">Chair ID</label>
+                    <input type="number" class="form-control" id="cId" name="cId" placeholder="Enter Chair ID" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="cName" class="form-label">Chair Name</label>
+                    <input type="text" class="form-control" id="cName" name="cName" placeholder="Enter Chair Name" required>
+                </div>
+
+
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-success btn-lg">Login</button>
+                </div>
+ <a href="${pageContext.request.contextPath}/register-form"> Register chair</a>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous">
+</script>
+</body>
+</html>
+
+
+LoginPage.jsp:
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+<title>User Login</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous">
+<style>
+    /* Custom style to center the card vertically and horizontally */
+    .center-card {
+        min-height: 100vh; /* Full viewport height */
+        display: flex;
+        align-items: center; /* Center vertically */
+        justify-content: center; /* Center horizontally */
+        background-color: #f8f9fa; /* Light background color */
+    }
+</style>
+</head>
+<body>
+
+<div class="container center-card">
+    <div class="card shadow-lg rounded-4 border-0" style="width: 28rem; background-color: #fff;">
+
+        <div class="card-header bg-primary text-white text-center">
+            <h3 class="mb-0">Login page</h3>
+        </div>
+
+        <div class="card-body p-4">
+
+            <form method="post" action="${pageContext.request.contextPath}/login">
+
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" placeholder="Enter username"id="username" name="username" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required placeholder="Enter password">
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-success btn-lg">Login</button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous">
+</script>
+</body>
+</html>
+
+
+register.jsp:
+
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register Chair</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+         n-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container center-card">
+    <div class="card shadow-lg rounded-4 border-0" style="width: 30rem; background-color: #fff;">
+
+        <div class="card-header bg-success text-white text-center">
+            <h3 class="mb-0">Register Chair</h3>
+        </div>
+
+        <div class="card-body p-4">
+        <form method="post" action="${pageContext.request.contextPath}/register-chair">
+
+
+                <div class="mb-3">
+                    <label for="cId" class="form-label">Chair ID</label>
+                    <input type="number" class="form-control" id="cId" name="cId" placeholder="Enter Chair ID" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="cName" class="form-label">Chair Name</label>
+                    <input type="text" class="form-control" id="cName" name="cName" placeholder="Enter Chair Name" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="cLegs" class="form-label">Number of Legs</label>
+                    <input type="number" class="form-control" id="cLegs" name="cLegs" placeholder="Enter number of legs" required>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">Register</button>
+                </div>
+  <a href="${pageContext.request.contextPath}/login-chair-form">login chair</a>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+
+
+
+success.jsp:
+
+<%@ page contentType="text/html; charset=UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Success</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+         ent-center align-items-center vh-100">
+
+    <div class="card shadow-lg text-center" style="width: 28rem;">
+        <div class="card-header bg-success text-white">
+            <h2 class="mb-0">Login Successful</h2>
+        </div>
+        <div class="card-body">
+            <h4 class="text-success mb-3">Welcome, admin!</h4>
+            <p class="lead">You have successfully logged in.</p>
+           <a href="${pageContext.request.contextPath}/home"> Go to Home</a>
+            <a th:href="@{/home}" class="d">
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+
+
+
+success-chair.jsp:
+
+
+<%@ page contentType="text/html; charset=UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Success</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+         ent-center align-items-center vh-100">
+
+    <div class="card shadow-lg text-center" style="width: 28rem;">
+        <div class="card-header bg-success text-white">
+            <h2 class="mb-0">Login Successful</h2>
+        </div>
+        <div class="card-body">
+            <h4 class="text-success mb-3">Welcome, admin!</h4>
+            <p class="lead">You have successfully logged in.</p>
+           <a href="${pageContext.request.contextPath}/home"> Go to Home</a>
+           <a href="${pageContext.request.contextPath}/register-form"> register chair</a>
+        <a href="${pageContext.request.contextPath}/login-chair-form">login chair</a>
+ <ul class="list-group">
+                <li class="list-group-item"><strong>Chair ID:</strong> ${cId}</li>
+                <li class="list-group-item"><strong>Chair Name:</strong> ${cName}</li>
+                <li class="list-group-item"><strong>Number of Legs:</strong> ${cLegs}</li>
+            </ul>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+
+
