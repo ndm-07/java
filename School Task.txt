@@ -1,289 +1,279 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-<modelVersion>4.0.0</modelVersion>
-<parent>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-parent</artifactId>
-<version>3.0.6</version>
-<relativePath/> <!-- lookup parent from repository -->
-</parent>
-<groupId>com</groupId>
-<artifactId>SchoolStrength</artifactId>
-<version>0.0.1-SNAPSHOT</version>
-<name>SchoolStrength</name>
-<description>SchoolStrength</description>
-<properties>
-<java.version>17</java.version>		
-</properties>
-<dependencies>		
-<dependency>
-<groupId>org.springframework.restdocs</groupId>
-<artifactId>spring-restdocs-mockmvc</artifactId>
-<scope>test</scope>
-</dependency>
-<dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-data-jpa</artifactId>
-</dependency>
-<dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-web</artifactId>
-</dependency>		
-<dependency>
-<groupId>mysql</groupId>
-<artifactId>mysql-connector-java</artifactId>
-<version>8.0.26</version>
-<scope>runtime</scope>
-</dependency>		
-<dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-test</artifactId>
-<scope>test</scope>
-</dependency>		
-<dependency>
-<groupId>junit</groupId>
-<artifactId>junit</artifactId>
-<version>4.12</version>
-<scope>test</scope>
-</dependency>
-</dependencies>
-<build>
-<plugins>			
-<plugin>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-maven-plugin</artifactId>				
-</plugin>
-<plugin>
-<groupId>org.codehaus.mojo</groupId>
-<artifactId>exec-maven-plugin</artifactId>
-<version>1.6.0</version>
-<configuration>
-<mainClass>com.SchoolStrengthApplication</mainClass>
-</configuration>
-<executions>
-<execution>
-<id>run-selenium</id>
-<phase>integration-test</phase>
-<goals><goal>java</goal></goals>
-</execution>
-</executions>
-</plugin>
-</plugins>
-</build>
-</project>
- 
-package com.bean;
-import java.util.ArrayList;
-import java.util.List;
-import jakarta.persistence.*;
-@Entity
-@Table(name = "school")
-public class School {
-    @Id
-    @Column(name="school_id")
-	private String schoolId ;
-	@Column(name="school_name")
-	private String schoolName ;
-	@Column(name="school_type")
-	private String schoolType ;
-	@Column(name="city")
-	private String city ;
-	@OneToMany(mappedBy="school",cascade=CascadeType.ALL)
-	private List<Student> studentList=new ArrayList<Student>();
-	public String getSchoolId() {
-		return schoolId;
-	}
-	public List<Student> getStudentList() {
-		return studentList;
-	}
-	public void setStudentList(List<Student> studentList) {
-		this.studentList = studentList;
-	}
-	public void setSchoolId(String schoolId) {
-		this.schoolId = schoolId;
-	}
-	public String getSchoolName() {
-		return schoolName;
-	}
-	public void setSchoolName(String schoolName) {
-		this.schoolName = schoolName;
-	}
-	public String getSchoolType() {
-		return schoolType;
-	}
-	public void setSchoolType(String schoolType) {
-		this.schoolType = schoolType;
-	}
-	public String getCity() {
-		return city;
-	}
-	public void setCity(String city) {
-		this.city = city;
-	}
- 
-}
- 
-Package com.bean;
-import jakarta.persistence.*;
-@Entity
-@Table(name="student")
-public class Student {
-    @Id
-    @Column(name="stud_roll_num")
-	private String studentRollNumber ; 
-	@Column(name="stud_name")
-	private String studentName ; 
-	@Column(name="stud_age")
-	private int studentAge ; 
-	@Column(name="stud_gender")
-	private String studentGender ;
-	@Column(name="stud_grade")
-	private String studentGrade ; 
-	@Column(name="stud_section")
-	private String studentSection ;
-	@ManyToOne
-	@JoinColumn(name="schoolid")
-	private School school;
-	public School getSchool() {
-		return school;
-	}
-	public void setSchool(School school) {
-		this.school = school;
-	}
-	public String getStudentRollNumber() {
-		return studentRollNumber;
-	}
-	public void setStudentRollNumber(String studentRollNumber) {
-		this.studentRollNumber = studentRollNumber;
-	}
-	public String getStudentName() {
-		return studentName;
-	}
-	public void setStudentName(String studentName) {
-		this.studentName = studentName;
-	}
-	public int getStudentAge() {
-		return studentAge;
-	}
-	public void setStudentAge(int studentAge) {
-		this.studentAge = studentAge;
-	}
-	public String getStudentGender() {
-		return studentGender;
-	}
-	public void setStudentGender(String studentGender) {
-		this.studentGender = studentGender;
-	}
-	public String getStudentGrade() {
-		return studentGrade;
-	}
-	public void setStudentGrade(String studentGrade) {
-		this.studentGrade = studentGrade;
-	}
-	public String getStudentSection() {
-		return studentSection;
-	}
-	public void setStudentSection(String studentSection) {
-		this.studentSection = studentSection;
-	}
-}
- 
-package com.dao;
-import com.bean.School;
-import com.bean.Student;
-import com.repository.SchoolRepository;
-import com.repository.StudentRepository;
-import java.util.List;
-import java.util.Optional; 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-@Component("schoolDAO") 
-public class SchoolDAO {
-	@Autowired
-	private SchoolRepository schoolRepository;
-	@Autowired
-	private StudentRepository studentRepository;
-    /**
-     * Functionality 1: addSchool
-     */
-	public void addSchool(School school){
-		schoolRepository.save(school);
-	}
-    /**
-     * Functionality 2: registerStudentToSchool
-     */
-    @Transactional
-	public void registerStudentToSchool(String schoolId, List<Student> student ) {
-	 	Optional<School> schoolOpt = schoolRepository.findById(schoolId); 
-	 	if(schoolOpt.isPresent()){
-            School school = schoolOpt.get();
-	 	 	for(Student s : student){
-	 	 	 	s.setSchool(school); // Set the bidirectional relationship
-	 	 	 	studentRepository.save(s); // Save the student
-	 	 	}
-	 	} else {
-             System.err.println("School with ID " + schoolId + " not found for student registration.");
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Gateway</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #FFFBDE;
+            color: #000000;
+            font-family: "Times New Roman", serif;
         }
-	}
-    /**
-     * Functionality 3: schoolWithMaximumStudents
-     */
-	public List<School> schoolWithMaximumStudents(String city){
-		return schoolRepository.findSchoolWithMaximumStudents(city); 
-	}
-}
- 
-package com.repository;
-import com.bean.School; // <-- FIX: Entity import added
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-import java.util.List;
-@Repository
-public interface SchoolRepository extends JpaRepository<School, String> {
-    /**
-     * FIX: Declaration of the required custom method.
-     * This query finds schools in a city where the student count (SIZE) equals 
-     * the maximum student count for that city.
-     */
-    @Query("SELECT s FROM School s WHERE s.city = :city AND SIZE(s.studentList) = " +
-           "(SELECT MAX(SIZE(s2.studentList)) FROM School s2 WHERE s2.city = :city)")
-    List<School> findSchoolWithMaximumStudents(@Param("city") String city);
-}
- 
-package com.repository;
-import com.bean.Student; // <-- FIX: Entity import added
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-@Repository
-public interface StudentRepository extends JpaRepository<Student, String> {
-    // Standard CRUD methods inherited
-}
- 
-// File: src/main/java/com/SchoolStrengthApplication.java
-package com;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-@SpringBootApplication
-public class SchoolStrengthApplication {
-	public static void main(String[] args) {
-		SpringApplication.run(SchoolStrengthApplication.class, args);
-	}
-    // DO NOT PLACE THE SchoolRepository INTERFACE HERE!
-}
- 
-spring.application.name=SchoolStrength
-server.port=8090
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.datasource.url=jdbc:mysql://localhost:3306/test23
-spring.datasource.username=root
-spring.datasource.password=@Ibm12345
-spring.jpa.generate-ddl=true
-spring.jpa.hibernate.ddl-auto=create
-# Show or not log for each SQL query
-spring.jpa.show-sql=true
-# Allows Hibernate to generate SQL optimized for a particular DBMS
-# spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+
+        .payment-card {
+            max-width: 460px;
+            background-color: ;
+            border-radius: 4px;
+        }
+
+        .card-title {
+            color: #096868;
+            font-weight: bold;
+        }
+
+        .option {
+            cursor: pointer;
+            border: 1px solid grey;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            background-color: #FFFFFF;
+        }
+
+        .option:hover {
+            background-color: rgba(144, 209, 202, 0.8);
+            color: #000000;
+        }
+
+        .option span:last-child {
+            color: #096868;
+            font-weight: bold;
+        }
+
+        .payment-form {
+            display: none;
+            background-color: #FFFBDE;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .payment-form h6 {
+            color: #096868;
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid grey;
+        }
+
+        .btn-primary {
+            background-color: #129990;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #096868;
+        }
+
+        .btn-success {
+            background-color: #90D1CA;
+            color: #000000;
+            border: none;
+        }
+
+        .btn-success:hover {
+            background-color: #129990;
+            color: #FFFFFF;
+        }
+
+        .wallet-balance {
+            color: #129990;
+            font-weight: bold;
+        }
+
+        /* Navbar background */
+        .navbar {
+            background-color: #90D1CA !important;
+        }
+
+        /* Navbar brand */
+        .navbar-brand {
+            color: #096B68 !important;
+            font-weight: bold;
+        }
+
+        /* Navbar links */
+        .nav-link {
+            color: #096B68 !important;
+        }
+
+        .nav-link:hover {
+            color: #129990 !important;
+        }
+
+        /* Dropdown menu */
+        .dropdown-menu {
+            background-color: #FFFBDE;
+        }
+
+        .dropdown-item {
+            color: #096B68;
+        }
+
+        .dropdown-item:hover {
+            background-color: #90D1CA;
+            color: #129990;
+        }
+
+        /* Search button */
+        .btn-outline-success {
+            color: #129990;
+            border-color: #129990;
+        }
+
+        .btn-outline-success:hover {
+            background-color: #129990;
+            color: #FFFBDE;
+        }
+
+        /* Search input */
+        .form-control {
+            border: 1px solid #129990;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Insurance Portal</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="register.jsp">Register</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.jsp">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="payment.jsp">Payment</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Team
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Ajay</a></li>
+                            <li><a class="dropdown-item" href="#">Dinesh</a></li>
+                            <li><a class="dropdown-item" href="#">Venu</a></li>
+                            <li><a class="dropdown-item" href="#">Sushma</a></li>
+                            <li><a class="dropdown-item" href="#">Nadeem</a></li>
+
+                        </ul>
+                    </li>
+                </ul>
+                <form class="d-flex" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search Policies" aria-label="Search" />
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="container min-vh-100 d-flex align-items-center justify-content-center">
+        <div class="card payment-card shadow p-4 w-100">
+
+            <h5 class="card-title mb-4">Payment Options for +91</h5>
+
+            <!-- Payment Options -->
+            <div class="list-group">
+
+                <div class="list-group-item d-flex justify-content-between option" onclick="showForm('upi')">
+                    <span>Pay by UPI ID / QR</span>
+                    <span>
+                        <i class="bi bi-currency-rupee"></i>
+                    </span>
+                </div>
+
+                <div class="list-group-item d-flex justify-content-between option" onclick="showForm('card')">
+                    <span>Card</span>
+                    <span>
+                        <i class="bi bi-credit-card"></i>
+                    </span>
+                </div>
+
+                <div class="list-group-item d-flex justify-content-between option" onclick="showForm('wallet')">
+                    <span>Wallets</span>
+                    <span>
+                        <i class="bi bi-wallet2"></i>
+                    </span>
+                </div>
+
+                <div class="list-group-item d-flex justify-content-between option" onclick="showForm('netbanking')">
+                    <span>Net Banking</span>
+                    <span>
+                        <i class="bi bi-bank"></i>
+                    </span>
+                </div>
+            <br>
+            </div>
+            <!-- ================= UPI FORM ================= -->
+            <div id="upi" class="payment-form">
+                <h6>UPI Payment</h6>
+                <input type="text" class="form-control mb-3" placeholder="Enter UPI ID">
+                <button class="btn btn-primary w-100">Pay Now</button>
+            </div>
+
+            <!-- ================= CARD FORM ================= -->
+            <div id="card" class="payment-form">
+                <h6>Card Payment</h6>
+                <input type="text" class="form-control mb-2" placeholder="Card Number">
+                <input type="password" class="form-control mb-3" placeholder="CVV">
+
+                <label class="form-label">Expiry Date:</label>
+                <input type="date" class="form-control mb-2">
+
+                <button class="btn btn-primary w-100">Pay Now</button>
+            </div>
+
+            <!-- ================= WALLET ================= -->
+            <div id="wallet" class="payment-form text-center">
+                <h6>Wallet Balance</h6>
+                <h4 class="wallet-balance">1,250.00</h4>
+
+                <button class="btn btn-success w-100 mt-3">Top Up Wallet</button>
+                <button class="btn btn-primary w-100 mt-2">Make Payment</button>
+            </div>
+
+            <!-- ================= NET BANKING ================= -->
+            <div id="netbanking" class="payment-form">
+                <h6>Net Banking</h6>
+                <input type="text" class="form-control mb-2" placeholder="Bank Account Number">
+                <input type="text" class="form-control mb-3" placeholder="IFSC Code">
+                <button class="btn btn-primary w-100">Proceed</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function showForm(formId) {
+            let forms = document.getElementsByClassName("payment-form");
+            for (let i = 0; i < forms.length; i++) {
+                forms[i].style.display = "none";
+            }
+            document.getElementById(formId).style.display = "block";
+        }
+    </script>
+
+</body>
+
+</html>
