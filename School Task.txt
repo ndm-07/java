@@ -1,1 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Gateway | LifeShield</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --primary: #1a3a5f;      /* Deep Navy */
+            --secondary: #2c3e50;    /* Charcoal Blue */
+            --accent: #27ae60;       /* Emerald Green */
+            --accent-hover: #219150; /* Darker Green */
+            --light: #f4f7f9;        /* Cool Grey BG */
+            --white: #ffffff;
+            --text-muted: #666;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--secondary);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* --- Navbar Styling --- */
+        .navbar {
+            background-color: var(--primary) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand, .nav-link {
+            color: var(--white) !important;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover {
+            color: var(--accent) !important;
+        }
+
+        /* --- Payment Card Styling --- */
+        .payment-card {
+            max-width: 460px;
+            background-color: var(--white);
+            border-radius: 15px;
+            border: none;
+        }
+
+        .card-title {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* --- Option List Styling --- */
+        .option {
+            cursor: pointer;
+            border: 1px solid #e0e6ed;
+            border-radius: 10px !important;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            background-color: var(--white);
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .option:hover {
+            background-color: #f8fafc;
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .option span:last-child i {
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+
+        /* --- Dynamic Form Section --- */
+        .payment-form {
+            display: none;
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e0e6ed;
+            margin-top: 15px;
+            animation: fadeIn 0.4s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .payment-form h6 {
+            color: var(--primary);
+            font-weight: bold;
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* --- Form Elements --- */
+        .form-control, .form-select {
+            border: 1px solid #ced4da;
+            padding: 10px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 0.25rem rgba(39, 174, 96, 0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .wallet-balance {
+            color: var(--accent);
+            font-weight: 800;
+            font-size: 1.8rem;
+        }
+
+        .btn-outline-light:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#">
+            <i class="bi bi-shield-fill-check me-2"></i>LifeShield
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="#">Register</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Login</a></li>
+                <li class="nav-item"><a class="nav-link active" href="#">Payment</a></li>
+            </ul>
+            <form class="d-flex">
+                <input class="form-control me-2 bg-transparent text-white border-secondary" type="search" placeholder="Search Policies">
+                <button class="btn btn-outline-light" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
+    <div class="card payment-card shadow-lg p-4 w-100">
+
+        <div class="text-center mb-4">
+            <h4 class="card-title mb-1">Secure Checkout</h4>
+            <p class="text-muted small">Policy Payment for ID: <strong>LS-882910</strong></p>
+        </div>
+
+        <div class="list-group list-group-flush mb-3">
+            <div class="list-group-item d-flex justify-content-between align-items-center option" onclick="showForm('upi')">
+                <span>UPI ID / QR Code</span>
+                <span><i class="bi bi-qr-code-scan"></i></span>
+            </div>
+
+            <div class="list-group-item d-flex justify-content-between align-items-center option" onclick="showForm('card')">
+                <span>Credit / Debit Card</span>
+                <span><i class="bi bi-credit-card"></i></span>
+            </div>
+
+            <div class="list-group-item d-flex justify-content-between align-items-center option" onclick="showForm('wallet')">
+                <span>LifeShield Wallet</span>
+                <span><i class="bi bi-wallet2"></i></span>
+            </div>
+
+            <div class="list-group-item d-flex justify-content-between align-items-center option" onclick="showForm('netbanking')">
+                <span>Net Banking</span>
+                <span><i class="bi bi-bank"></i></span>
+            </div>
+        </div>
+
+        <div id="upi" class="payment-form">
+            <h6>UPI Payment</h6>
+            <div class="mb-3">
+                <label class="form-label small fw-bold">Enter VPA / UPI ID</label>
+                <input type="text" class="form-control" placeholder="example@upi">
+            </div>
+            <button class="btn btn-primary w-100">Verify & Pay</button>
+        </div>
+
+        <div id="card" class="payment-form">
+            <h6>Card Details</h6>
+            <div class="mb-2">
+                <label class="form-label small fw-bold">Card Number</label>
+                <input type="text" class="form-control" placeholder="xxxx xxxx xxxx xxxx">
+            </div>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">Expiry</label>
+                    <input type="text" class="form-control" placeholder="MM/YY">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">CVV</label>
+                    <input type="password" class="form-control" placeholder="***">
+                </div>
+            </div>
+            <button class="btn btn-primary w-100 mt-3">Pay Premium</button>
+        </div>
+
+        <div id="wallet" class="payment-form text-center">
+            <h6>Wallet Balance</h6>
+            <small class="text-muted d-block mb-1">Available for LS-User</small>
+            <h4 class="wallet-balance">₹ 1,250.00</h4>
+            <button class="btn btn-primary w-100 mt-3">Confirm & Pay</button>
+        </div>
+
+        <div id="netbanking" class="payment-form">
+            <h6>Select Bank</h6>
+            <select class="form-select mb-3">
+                <option selected disabled>Choose your bank</option>
+                <option>HDFC Bank</option>
+                <option>SBI</option>
+                <option>ICICI Bank</option>
+                <option>Axis Bank</option>
+            </select>
+            <button class="btn btn-primary w-100">Proceed to Secure Portal</button>
+        </div>
+
+        <div class="text-center mt-4">
+            <p style="font-size: 0.75rem; color: var(--text-muted);">
+                <i class="bi bi-lock-fill"></i> Your transaction is protected by bank-grade encryption.
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function showForm(formId) {
+        const forms = document.querySelectorAll(".payment-form");
+        forms.forEach(form => form.style.display = "none");
+
+        const activeForm = document.getElementById(formId);
+        if (activeForm) {
+            activeForm.style.display = "block";
+        }
+    }
+</script>
+
+</body>
+
+</html>
 
