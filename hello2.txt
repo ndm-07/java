@@ -1,1 +1,343 @@
-This is Task 17 file 2
+Payment Management Module
+User Story → Operations Breakdown
+
+I’ll cover the core payment user stories (the ones that actually drive implementation).
+You can reuse the same format for documentation, sprint planning, or viva.
+
+User Story: PG01 – Make a Premium Payment
+
+User Story:
+As a user, I want to make a premium payment for my insurance policy.
+
+UI Tasks
+
+Create Payment form using Bootstrap
+
+Fields: Policy ID, Payment Amount
+
+Add client-side validation for mandatory fields
+
+Provide “Pay Now” submit button
+
+Display payment success or failure message
+
+Middle Tier Tasks
+
+Create PaymentController with makePayment() POST endpoint
+
+Validate input data in controller/service
+
+Create PaymentService to process payment logic
+
+Initialize payment status as PENDING
+
+Simulate payment result (SUCCESS / FAILED)
+
+Database Tasks
+
+Create payments table
+
+payment_id (PK)
+
+policy_id (FK)
+
+payment_amount
+
+payment_date
+
+payment_status
+
+Insert new payment record during payment processing
+
+Tester Tasks
+
+Unit test for payment creation logic
+
+Verify correct status assignment (SUCCESS / FAILED)
+
+Validate mandatory field checks
+
+User Story: PG02 – Simulated Payment Processing
+
+User Story:
+As a system, I want to simulate payment processing without real gateway integration.
+
+UI Tasks
+
+Show “Processing Payment…” indicator
+
+Display simulated response message
+
+Middle Tier Tasks
+
+Implement mock payment logic in PaymentService
+
+Randomly or conditionally set payment status
+
+Update payment status after simulation
+
+Database Tasks
+
+Update payment status column after processing
+
+Tester Tasks
+
+Unit test for simulation logic
+
+Verify all possible statuses are handled
+
+ID: PG03
+User Story:
+
+As a system, I want to store payment details so that payment history can be retrieved later.
+
+UI – Tasks
+
+Ensure payment confirmation screen reflects stored payment details.
+
+Display reference/payment ID after successful payment submission.
+
+Middle Tier – Tasks
+
+Create PaymentService method to store payment information.
+
+Map payment request data to Payment entity.
+
+Invoke PaymentDAO to persist payment details.
+
+Handle success and failure scenarios during data persistence.
+
+Database – Tasks
+
+Create payments table with required columns:
+
+payment_id
+
+policy_id
+
+payment_amount
+
+payment_date
+
+payment_status
+
+Ensure payment_date is automatically captured during insert.
+
+Tester – Tasks
+
+Unit test for successful payment data persistence.
+
+Verify stored values match the input payment data.
+
+
+User Story: PG04 – View Payment Details
+
+User Story:
+As a user, I want to view details of a specific payment.
+
+UI Tasks
+
+Create Payment Details page (JSP)
+
+Input field to enter Payment ID
+
+Display payment information in read-only format
+
+Middle Tier Tasks
+
+Create getPaymentDetails() method in PaymentController
+
+Fetch payment data using PaymentService
+
+Handle invalid payment ID scenarios
+
+Database Tasks
+
+Query payment record using payment_id
+
+Tester Tasks
+
+Unit test for fetching payment details
+
+Test invalid and valid payment ID scenarios
+
+User Story: PG05 – View Payments by Policy
+
+User Story:
+As a user, I want to view all payments made for a policy.
+
+UI Tasks
+
+Create policy payment history page
+
+Input field for Policy ID
+
+Display payment list in tabular format
+
+Middle Tier Tasks
+
+Create getPaymentsByPolicy() in PaymentController
+
+Implement service logic to retrieve list of payments
+
+Handle empty result cases
+
+Database Tasks
+
+Query payments using policy_id
+
+Tester Tasks
+
+Integration test for payment list retrieval
+
+Validate correct data mapping
+
+User Story: PG06 – Update Payment Status
+
+User Story:
+As a system, I want to update payment status after processing.
+
+UI Tasks
+
+Display updated payment status after transaction
+
+Middle Tier Tasks
+
+Implement status update logic in PaymentService
+
+Ensure status transitions are valid
+
+Database Tasks
+
+Update payment_status column
+
+Tester Tasks
+
+Unit test for payment status updates
+
+ID: PG07
+User Story:
+
+As a system, I want to validate payment inputs so that invalid or incorrect payment data is not processed.
+
+UI – Tasks
+
+Implement client-side validation for mandatory fields.
+
+Restrict invalid values (negative amount, empty policy ID).
+
+Display validation error messages to the user.
+
+Middle Tier – Tasks
+
+Implement server-side validation in PaymentController.
+
+Validate payment amount, policy ID, and request integrity.
+
+Reject invalid payment requests before processing.
+
+Return meaningful validation error responses.
+
+Database – Tasks
+
+Enforce NOT NULL constraints on required columns.
+
+Prevent insertion of invalid or incomplete payment records.
+
+Tester – Tasks
+
+Unit test for invalid input scenarios.
+
+Verify payment is not persisted for invalid data.
+
+Test boundary values for payment amount.
+
+
+User Story: PG08 – Payment Confirmation Message
+
+User Story:
+As a user, I want to see confirmation after payment attempt.
+
+UI Tasks
+
+Show success or failure message
+
+Display payment reference number
+
+Middle Tier Tasks
+
+Pass payment status and message to UI
+
+Map status to user-friendly messages
+
+Database Tasks
+
+✔ No new DB changes (uses existing payment data)
+
+Tester Tasks
+
+UI validation test for confirmation messages
+
+
+
+ID: PG09
+User Story:
+
+As a system, I want each payment to have a unique payment ID so that transactions can be uniquely identified.
+
+UI – Tasks
+
+Display generated payment ID after successful payment.
+
+Middle Tier – Tasks
+
+Configure Payment entity to use auto-generated primary key.
+
+Ensure payment ID is assigned at the time of persistence.
+
+Return generated payment ID in response.
+
+Database – Tasks
+
+Define payment_id as PRIMARY KEY.
+
+Configure auto-increment / sequence for payment_id.
+
+Tester – Tasks
+
+Unit test to verify unique payment ID generation.
+
+Validate no duplicate payment IDs are created.
+
+ID: PG10
+User Story:
+
+As an administrator, I want to retrieve payments by policy so that I can audit premium collections.
+
+UI – Tasks
+
+Create admin payment search page.
+
+Provide input field for Policy ID.
+
+Display payment records in a tabular format.
+
+Middle Tier – Tasks
+
+Implement getPaymentsByPolicy() in PaymentController.
+
+Create service method to fetch payments by policy ID.
+
+Handle scenarios where no payments exist for a policy.
+
+Database – Tasks
+
+Write query to fetch payments using policy_id.
+
+Optimize query for policy-based search.
+
+Tester – Tasks
+
+Integration test for payment retrieval by policy ID.
+
+Validate accuracy of retrieved payment records.
