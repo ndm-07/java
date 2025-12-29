@@ -1,1 +1,186 @@
-This is Task 17 file 1
+Payment Management Module – User Stories
+ID: PG01
+
+User Story:
+As a user, I want to make a premium payment for my insurance policy so that my policy remains active.
+
+Priority: High
+Est. Effort: 5
+
+Acceptance Criteria:
+
+Given a valid policy ID and payment amount
+
+When the user initiates payment
+
+Then the system processes the payment and records the transaction with status SUCCESS or FAILED
+
+ID: PG02
+
+User Story:
+As a user, I want the system to support simulated payment processing so that I can complete payments without real banking integration.
+
+Priority: High
+Est. Effort: 3
+
+Acceptance Criteria:
+
+Given a payment request
+
+When the payment is processed
+
+Then the system simulates the transaction and assigns a payment status (SUCCESS, FAILED, or PENDING)
+
+ID: PG03 -----------------------
+
+User Story:
+As a system, I want to store payment details so that payment history can be retrieved later.
+
+Priority: High
+Est. Effort: 4
+
+Acceptance Criteria:
+
+Given a processed payment
+
+When the transaction is completed
+
+Then payment details (paymentId, policyId, amount, date, status) are saved in the database
+
+ID: PG04
+
+User Story:
+As a user, I want to view payment details of a specific transaction so that I can verify my payment status.
+
+Priority: Medium
+Est. Effort: 3
+
+Acceptance Criteria:
+
+Given a valid payment ID
+
+When the user requests payment details
+
+Then the system displays payment amount, date, policy ID, and payment status
+
+ID: PG05
+
+User Story:
+As a user, I want to view all payments made for a specific policy so that I can track my premium history.
+
+Priority: Medium
+Est. Effort: 4
+
+Acceptance Criteria:
+
+Given a valid policy ID
+
+When the user requests payment history
+
+Then the system returns a list of all payments associated with that policy
+
+ID: PG06
+
+User Story:
+As a system, I want to update the payment status after processing so that the current state of the payment is accurately maintained.
+
+Priority: High
+Est. Effort: 2
+
+Acceptance Criteria:
+
+Given a payment transaction
+
+When payment processing completes
+
+Then the payment status is updated to SUCCESS, FAILED, or PENDING
+
+ID: PG07 --------------------------------------------------
+
+User Story:
+As a system, I want to validate payment inputs so that invalid or incorrect payment data is not processed.
+
+Priority: High
+Est. Effort: 3
+
+Acceptance Criteria:
+
+Given a payment request
+
+When mandatory fields (policyId, paymentAmount) are missing or invalid
+
+Then the system rejects the payment and marks it as FAILED
+
+ID: PG08
+
+User Story:
+As a user, I want the system to display confirmation after a payment attempt so that I know whether the payment was successful or not.
+
+Priority: Medium
+Est. Effort: 2
+
+Acceptance Criteria:
+
+Given a completed payment attempt
+
+When the system finishes processing
+
+Then a success or failure confirmation message is shown to the user
+
+ID: PG09 --------------------------------------------
+
+User Story:
+As a system, I want each payment to have a unique payment ID so that transactions can be uniquely identified.
+
+Priority: High
+Est. Effort: 2
+
+Acceptance Criteria:
+
+Given a payment record
+
+When it is stored in the database
+
+Then a unique paymentId is generated and associated with the transaction
+
+ID: PG10 -------------------------------------------
+
+User Story:
+As an administrator, I want to retrieve payments by policy so that I can audit premium collections.
+
+Priority: Medium
+Est. Effort: 4
+
+Acceptance Criteria:
+
+Given a policy ID
+
+When the admin requests payment data
+
+Then all related payment records are retrieved accurately
+
+Traceability Matrix (Why Trainers Love This)
+User Story	Controller Method	Service	Entity
+PG01	makePayment()	process payment	Payment
+PG04	getPaymentDetails()	fetch payment	Payment
+PG05	getPaymentsByPolicy()	fetch payments	Payment
+PG06	makePayment()	update status	Payment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
